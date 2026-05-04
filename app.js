@@ -124,24 +124,35 @@ app.put('/edit/:id', upload.single('image'), (req,res) => {
 
 //DELETE PRODUCT  //ลบสินค้า
 app.delete('/delete/:id', (req,res) => {
+
     dbConnection.execute(
-        "SELECT  * FROM products WHERE id=?",
+        "SELECT * FROM products WHERE id=?",
         [req.params.id]
     )
+
     .then(([rows]) => {
-        //ดึงรูปสินค้า
-        let image = rows[0].image;  
-        //ลบรูปจาก uploads
-        fs.unlinkSync('public/uploads/' + image);
-        //ลบข้อมูลจาก DB
+        let image = rows[0].image;
+        const imagePath = path.join(__dirname, 'public', 'uploads', image);
+        // เช็กก่อนลบ
+        if (fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
+            console.log('ลบรูปสำเร็จ');
+        } else {
+            console.log('ไม่พบรูป:', imagePath);
+        }
+
+        // ลบข้อมูลใน database
         dbConnection.execute(
             "DELETE FROM products WHERE id=?",
             [req.params.id]
         )
+
         .then(() => {
             res.redirect('/');
         });
+
     });
+
 });
 
 //SERVER  //รัน server ที่ port 5000
