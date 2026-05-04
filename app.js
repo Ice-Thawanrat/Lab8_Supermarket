@@ -88,7 +88,13 @@ app.put('/edit/:id', upload.single('image'), (req,res) => {
         //ถ้ามีอัปโหลดรูปใหม่
         if (req.file){
             //ลบรูปเก่า
-            fs.unlinkSync('public/uploads/' + oldImage);
+            const imagePath = 'public/uploads/' + oldImage;
+            if (fs.existsSync(imagePath)) {
+                fs.unlinkSync(imagePath);
+                console.log('ลบรูปสำเร็จ');
+            } else {
+                console.log('ไม่พบไฟล์:', imagePath);
+            }
             image = req.file.filename;
         }
         dbConnection.execute(
